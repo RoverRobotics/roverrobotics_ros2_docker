@@ -35,7 +35,7 @@ RUN wget https://github.com/IntelRealSense/librealsense/raw/master/scripts/libuv
     chmod +x ./libuvc_installation.sh && \
     ./libuvc_installation.sh    
 
-RUN apt-get update && apt-get install -y usbutils xorg x11-apps gedit libasio-dev ros-${ROS_DISTRO}-nmea-msgs ros-${ROS_DISTRO}-rtcm-msgs ros-${ROS_DISTRO}-sick-scan-xd ros-${ROS_DISTRO}-rviz2 iputils-ping && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y usbutils xorg x11-apps gedit libasio-dev ros-${ROS_DISTRO}-nmea-msgs ros-${ROS_DISTRO}-rtcm-msgs ros-${ROS_DISTRO}-sick-scan-xd ros-${ROS_DISTRO}-rviz2 iputils-ping ros-${ROS_DISTRO}-example-interfaces && rm -rf /var/lib/apt/lists/*
 
 RUN echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
@@ -45,7 +45,7 @@ RUN printf '%s\n' '#!/usr/bin/env bash' \
     'source /opt/ros/jazzy/setup.bash' \
     'source /home/ubuntu/rover_workspace/install/setup.bash' \
     'set -u' \
-    'exec ros2 launch roverrobotics_driver max_teleop.launch.py' \
+    'exec ros2 launch roverrobotics_driver mega_teleop.launch.py' \
     'PID=\$!' \
     'wait "\$PID"' \
     > /usr/sbin/roverrobotics && chmod +x /usr/sbin/roverrobotics && chown ubuntu:ubuntu /usr/sbin/roverrobotics
@@ -54,6 +54,7 @@ RUN printf '%s\n' \
     '[Service]' \
     'Type=simple' \
     'User=ubuntu' \
+    'Environment=ROS_DOMAIN_ID=42' \
     'ExecStart=/usr/sbin/roverrobotics' \
     '' \
     '[Install]' \
@@ -75,6 +76,7 @@ RUN printf '%s\n' \
     'CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW' \
     'AmbientCapabilities=CAP_NET_ADMIN CAP_NET_RAW' \
     'NoNewPrivileges=no' \
+    'Environment=ROS_DOMAIN_ID=42' \
     'ExecStart=/usr/sbin/enablecan' \
     'RemainAfterExit=yes' \
     '' \
