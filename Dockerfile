@@ -1,4 +1,4 @@
-FROM arm64v8/ros:jazzy-ros-base-noble
+FROM ros:jazzy-ros-base-noble
 
 ENV DEBIAN_FRONTEND=noninteractive
 
