@@ -7,12 +7,12 @@ including LiDAR, IMU, Intel RealSense, and PS4 controller support.
 
 ## ✅ STEP 1 – Install Docker
 
-1. Install Docker Engine for Ubuntu:  
+1. Install Docker Engine for Ubuntu on the host system:  
    https://docs.docker.com/engine/install/ubuntu/
 
    > Recommended: **Install using the APT repository**.
 
-2. Complete the Docker post-install steps (non-root usage, etc.):  
+2. Complete the Docker Linux post-install steps (non-root usage, etc.):  
    https://docs.docker.com/engine/install/linux-postinstall/
 
 ---
@@ -33,7 +33,7 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
-The setup script will:
+Follow the prompts in the setup script. It will:
 
 📥 Install:
 
@@ -44,6 +44,8 @@ The setup script will:
 - BNO055 IMU packages
 
 - Intel RealSense packages
+  
+- ZED F9P GPS packages 
 
 - PS4 controller support
 
@@ -54,109 +56,80 @@ The setup script will:
 
 📝 Note
 
-The Rover Robotics ROS 2 Jazzy repo, RP LiDAR S2 repo, and BNO055 IMU repo will be installed in
+- The Rover Robotics ROS 2 Jazzy repo, RP LiDAR S2 repo, BNO055 IMU repo, and ZEDF9P GPS repo will be installed in
 ~/rover_workspace on the host, and this workspace will be mounted into the Docker container.
 
-Intel RealSense files and packages will be installed inside the Docker image based on the user’s choice.
-
-
-
-### Docker setup for ROVER ROBOTICS ROS2 Jazzy:
+- Intel RealSense files and packages will be installed inside the Docker image based on the user’s choice.
 
 ---
 
-## STEP - 1 Install Docker
+## 🧱 STEP 4 – Build ROS 2 Packages Inside the Container
 
-link: https://docs.docker.com/engine/install/ubuntu/
-
-Follow the steps given in this (recommended method: Install using the apt repository)
-
-After the installation, do the steps given in the link: https://docs.docker.com/engine/install/linux-postinstall
-
----
-
-## STEP - 2 Clone the Repository
-
-```
-git clone https://github.com/RoverRobotics/roverrobotics_ros2_docker.git
-```
----
-
-## STEP - 3 Setup
-
-```
-cd ~/roverrobotics_ros2_docker
-chmod +x setup.sh
-./setup.sh
-```
-Follow the prompts in the install scripts.
-
-This script will help in the: 
-
-- Installation of Rover Robotics GitHub, packages for RP S2 Lidar, BNO055 IMU, Intel RealSense, and PS4 controller 
-- Builds the Docker image 
-- Set up the automatic startup service for the Rover Jazzy Docker container. (helpful for driving the robot after boot)
-
-Note: The Rover Robotics ROS2 Jazzy Github repo, RP lidar S2 repo, and BNO055 IMU repo will be installed in rover_workspace 
-inside the host system and will be attached to the Docker. 
-The files and Packages for Intel RealSense will be installed in the image directly based on the user's request 
-
----
-
-## STEP - 4 Building the packages
-
-Enter into container
+After the container is created and running, enter the container and run:
 ```
 cd /home/ubuntu/rover_workspace
 colcon build
 source ~/.bashrc
 ```
-For the first time, the packages will not be built. Therefore, the packages have to be built for using the rover robotics ros2
 
-Then restart the services
+ℹ️ The packages are not pre-built on the first setup, so colcon build is required before using
+the Rover Robotics ROS 2 stack.
+
+Then, on the host, restart the services:
 ```
 sudo systemctl restart roverrobotics.service
 sudo systemctl restart can.service
 ```
+
 ---
 
-## For Manual setup
+## ✅ You’re now ready to use the Rover Robotics ROS 2 Jazzy stack inside Docker.
 
-To build the rover jazzy image
+### 💡 Check Useful Tips
+
+## 🛠️ Manual Setup (Alternative)
+
+If you want to manually build the image and create the container instead of using setup.sh:
+
+1️⃣ Build the Rover Jazzy Docker Image
 ```
-chmod +x rover_jazzy_image.sh 
+chmod +x rover_jazzy_image.sh
 ./rover_jazzy_image.sh
 ```
-
-To create the rover jazzy container
+2️⃣ Create the Rover Jazzy Container
 ```
 chmod +x run_rover_rover_jazzy_con.sh
 ./run_rover_rover_jazzy_con.sh
 ```
+
 ---
 
-## Useful Tips 
+## 💡 Useful Tips (SSH, X11, User)
+## 🔁 SSH to Host
 
-If you are SSHing into the host system that runs Docker and want the display of Docker:
-Add this in the SSH configuration after hostname and user
+- If you SSH into the host (which runs Docker) and want GUIs from inside the container:
 
+Add this to your local SSH config (~/.ssh/config):
 ```
-ForwardX11 yes
-ForwardX11Trusted yes
-Compression yes
+Host <your-host-alias>
+    HostName <your-host-ip>
+    User <your-username>
+    ForwardX11 yes
+    ForwardX11Trusted yes
+    Compression yes
 ```
+- 🖥️ Allow X11 Clients
 
-And run everything as user ubuntu instead of user root
-
-```
-su - ubuntu
-```
-
-If you are SSHing from a new system to the host for Docker or directly using the host system for Docker
-
+On the host (when using a local or newly SSH’d client):
 ```
 xhost +
 ```
+- 👤 Use ubuntu User instead of root Inside the Container
 
+Inside the container:
+```
+su - ubuntu
+```
+Even if you don’t need GUI / display, it’s strongly recommended to run all sensor launch files and ROS 2 nodes as the Ubuntu user rather than root
 
 
