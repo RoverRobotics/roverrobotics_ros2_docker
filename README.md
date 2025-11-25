@@ -83,9 +83,10 @@ sudo systemctl restart can.service
 
 ---
 
-## ✅ You’re now ready to use the Rover Robotics ROS 2 Jazzy stack inside Docker.
-
+### ✅ You’re now ready to use the Rover Robotics ROS 2 Jazzy stack inside Docker.
 ### 💡 Check Useful Tips
+
+---
 
 ## 🛠️ Manual Setup (Alternative)
 
