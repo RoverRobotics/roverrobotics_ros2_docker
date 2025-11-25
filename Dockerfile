@@ -1,11 +1,11 @@
-FROM arm64v8/ros:jazzy-ros-base-noble
+FROM ros:jazzy-ros-base-noble
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     systemd systemd-sysv dbus udev \
     sudo bash-completion \
-    nano git net-tools \
+    nano git wget net-tools \
     build-essential cmake \
     python3-pip python3-colcon-common-extensions python3-rosdep python3-vcstool \
     gstreamer1.0-tools gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
@@ -30,13 +30,22 @@ RUN echo 'source /opt/ros/jazzy/setup.bash' >> /etc/bash.bashrc && \
     echo 'export ROS_DOMAIN_ID=${ROS_DOMAIN_ID}' >> /etc/bash.bashrc &&\
     echo 'source /home/ubuntu/rover_workspace/install/setup.bash' >> /etc/bash.bashrc
 
+RUN wget https://github.com/IntelRealSense/librealsense/raw/master/scripts/libuvc_installation.sh && \
+    sed -i '46s|.*|cmake ../ -DFORCE_LIBUVC=true -DCMAKE_BUILD_TYPE=release -DBUILD_EXAMPLES=true -DBUILD_GRAPHICAL_EXAMPLES=true|' libuvc_installation.sh && \
+    chmod +x ./libuvc_installation.sh && \
+    ./libuvc_installation.sh    
+
+RUN apt-get update && apt-get install -y usbutils xorg x11-apps gedit libasio-dev ros-${ROS_DISTRO}-nmea-msgs ros-${ROS_DISTRO}-rtcm-msgs ros-${ROS_DISTRO}-sick-scan-xd ros-${ROS_DISTRO}-rviz2 iputils-ping ros-${ROS_DISTRO}-example-interfaces && rm -rf /var/lib/apt/lists/*
+
+RUN echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
 RUN printf '%s\n' '#!/usr/bin/env bash' \
     'set -eo pipefail' \
     'set +u' \
     'source /opt/ros/jazzy/setup.bash' \
     'source /home/ubuntu/rover_workspace/install/setup.bash' \
     'set -u' \
-    'exec ros2 launch roverrobotics_driver max_teleop.launch.py' \
+    'exec ros2 launch roverrobotics_driver mega_teleop.launch.py' \
     'PID=\$!' \
     'wait "\$PID"' \
     > /usr/sbin/roverrobotics && chmod +x /usr/sbin/roverrobotics && chown ubuntu:ubuntu /usr/sbin/roverrobotics
@@ -45,6 +54,7 @@ RUN printf '%s\n' \
     '[Service]' \
     'Type=simple' \
     'User=ubuntu' \
+    'Environment=ROS_DOMAIN_ID=42' \
     'ExecStart=/usr/sbin/roverrobotics' \
     '' \
     '[Install]' \
@@ -66,6 +76,7 @@ RUN printf '%s\n' \
     'CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW' \
     'AmbientCapabilities=CAP_NET_ADMIN CAP_NET_RAW' \
     'NoNewPrivileges=no' \
+    'Environment=ROS_DOMAIN_ID=42' \
     'ExecStart=/usr/sbin/enablecan' \
     'RemainAfterExit=yes' \
     '' \
