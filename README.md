@@ -124,6 +124,7 @@ Host <your-host-alias>
 On the host (when using a local or newly SSH’d client):
 ```
 xhost +
+xhost +local: 
 ```
 - 👤 Use ubuntu User instead of root Inside the Container
 
@@ -133,4 +134,20 @@ su - ubuntu
 ```
 Even if you don’t need GUI / display, it’s strongly recommended to run all sensor launch files and ROS 2 nodes as the Ubuntu user rather than root
 
+--- 
 
+## 🎛️ By Default the display of Docker container is through ssh system
+- But If you want GUIs to render directly on the host’s physical screen instead, you need to match the host’s DISPLAY
+```
+sudo nano /etc/systemd/system/rover_jazzy_docker.service 
+Environment="DISPLAY=:1"
+```
+- Make sure DISPLAY matches the host value:
+```
+echo $DISPALY
+```
+- Restart the startup service
+```
+sudo systemctl daemon-reload
+sudo systemctl restart rover_jazzy_docker.service
+```
